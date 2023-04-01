@@ -1,13 +1,14 @@
 import init_db as conn
 from flask import Flask, request
-from services import users
+from services import users as UserService
 
 app = Flask(__name__)
 
 
 @app.route("/index")
 def index():
-    result = users.UsersService.all()
+    service = UserService
+    result = service.all()
     return result
 
 
