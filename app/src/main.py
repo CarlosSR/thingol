@@ -1,24 +1,32 @@
-import mysql.connector
-from flask import Flask, render_template
+import init_db as conn
+from flask import Flask, request
+from services import users
 
 app = Flask(__name__)
 
 
 @app.route("/index")
 def index():
-    database = mysql.connector.connect(
-        host="db",
-        port="3306",
-        user="root",
-        password="root",
-        database="thingol"
-    )
-    cursor = database.cursor()
-    cursor.execute("SHOW DATABASES")
-    result = cursor.fetchall()
+    result = users.UsersService.all()
     return result
 
 
-@app.route("/user/<name>")
-def user(name):
-    return render_template('user.html', name=name)
+@app.route('/create-user', methods=['POST'])
+def create():
+    content_type = request.headers.get('Content-Type')
+    if content_type == 'application/json':
+        db = conn.get_db_connection()
+        data = request.get_json()
+        names = data['names']
+        first_name = data['first_name']
+        last_name = data['last_name']
+        password = data['password']
+        insert = f"INSERT INTO users " \
+                 f"(names, first_name, last_name, password) " \
+                 f"values " \
+                 f"('{names}', '{first_name}', '{last_name}', '{password}'); "
+        cursor = db.cursor()
+        cursor.execute(insert)
+        db.commit()
+        return 'user saved'
+
