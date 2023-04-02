@@ -1,4 +1,4 @@
-from flask import Flask, request
+from flask import Flask, request, jsonify
 from services import users as UserService
 
 app = Flask(__name__)
@@ -8,7 +8,7 @@ app = Flask(__name__)
 def index():
     service = UserService
     result = service.all()
-    return result
+    return jsonify(result)
 
 
 @app.route('/create-user', methods=['POST'])

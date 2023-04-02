@@ -1,11 +1,14 @@
-from app.src.dbconn import sqlite as conn
+from app.src.dbconn import mariadb as conn
 
 
 def all():
     query = "select * from users;"
     db = conn()
-    result = db.execute(query).fetchall()
-    return result
+    # This is the way SQLite works. We will use mariadb, but in case of coming back.
+    # result = db.execute(query).fetchall()
+    cursor = db.cursor()
+    cursor.execute(query)
+    return cursor.fetchall()
 
 
 def create(data):
