@@ -1,9 +1,6 @@
 from app.src.dbconn import mariadb as conn
-from app.src.main import app as app
 from werkzeug.security import generate_password_hash, check_password_hash
-import jwt
-from datetime import datetime, timedelta
-from flask import make_response
+from flask_jwt_extended import create_access_token
 
 
 def all():
@@ -43,11 +40,8 @@ def login(data):
     cursor.execute(query)
     user = cursor.fetchone()
     if check_password_hash(user['password'], password):
-        token = jwt.encode({
-            'user': user.get('first_name'),
-            'exp': str(datetime.utcnow() + timedelta(seconds=1800)),
-        }, '1234567890')
-        return {'token': token}
+        access_token = create_access_token(identity=user['names'])
+        return access_token
     else:
         return 'Unable to verify', 403
 

@@ -1,25 +1,13 @@
 from flask import Flask, request, jsonify, session, flash
-import jwt
 from services import users as UserService
-from functools import wraps
+from flask_jwt_extended import create_access_token
+from flask_jwt_extended import get_jwt_identity
+from flask_jwt_extended import jwt_required
+from flask_jwt_extended import JWTManager
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = '1234567890'
-
-
-def token_required(func):
-    @wraps(func)
-    def decorated(*args, **kwargs):
-        token = request.args.get('token')
-        if not token:
-            return jsonify({'Error': 'Token is missing.'}), 401
-
-        try:
-            data = jwt.decode(token, '1234567890', algorithms=['HS256', ])
-        except jwt.InvalidTokenError:
-            return jsonify({'Message': 'Invalid token.'}), 403
-        return func(*args, **kwargs)
-    return decorated
+app.config["JWT_SECRET_KEY"] = "super-secret"  # Change this!
+jwt = JWTManager(app)
 
 
 @app.route('/login', methods=['POST'])
@@ -30,7 +18,7 @@ def login():
 
 
 @app.route("/index")
-@token_required
+@jwt_required()
 def index():
     service = UserService
     result = service.all()
