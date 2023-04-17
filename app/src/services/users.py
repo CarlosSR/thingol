@@ -1,34 +1,34 @@
 from app.src.dbconn import mariadb as conn
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import create_access_token
+from app.src.repositories import user
+from app.src.utilities.Validator import Validator
 
 
 def all():
-    query = "select * from users;"
-    db = conn()
-    # This is the way SQLite works. We will use mariadb, but in case of coming back.
-    # result = db.execute(query).fetchall()
-    cursor = db.cursor()
-    cursor.execute(query)
-    return cursor.fetchall()
+    users = user.all_users()
+    return users
 
 
 def create(data):
-    db = conn()
-    names = data['names']
-    first_name = data['first_name']
-    last_name = data['last_name']
-    password = data['password']
-    email = data['email']
-    hashed_pass = generate_password_hash(password)
-    insert = f'''INSERT INTO users 
-                    (names, first_name, last_name, email, password) 
-                values
-                    ('{names}', '{first_name}', '{last_name}', '{email}', '{hashed_pass}');'''
-    cursor = db.cursor()
-    cursor.execute(insert)
-    db.commit()
-    return 'user saved.'
+    rules = {
+        'names': 'string|required|max:7',
+        'first_name': 'string|required|max:7',
+        'last_name': 'string|required',
+        'password': 'string|required|min:10',
+        'email': 'string||min:10'
+    }
+    validator = Validator(data, rules)
+    validator.apply()
+    if validator.errors:
+        return validator.errors
+
+    return validator.payload
+    result = user.create(validator.payload)
+    if result:
+        return 'User saved.'
+
+    return result
 
 
 def login(data):

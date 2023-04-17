@@ -6,6 +6,7 @@ def sqlite():
     conn = sqlite3.connect('/thingol/db/sqlite/database.db')
     return conn
 
+
 def mariadb():
     database = mysql.connector.connect(
         host="db",
